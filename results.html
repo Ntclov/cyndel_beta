@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска - MySearch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #202124;
+        }
+        .header {
+            display: flex;
+            padding: 15px 20px;
+            align-items: center;
+            border-bottom: 1px solid #ebebeb;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4285F4;
+            margin-right: 30px;
+        }
+        .search-container {
+            flex-grow: 1;
+            position: relative;
+            max-width: 600px;
+        }
+        .search-input {
+            width: 100%;
+            height: 40px;
+            border-radius: 20px;
+            border: 1px solid #dfe1e5;
+            padding: 0 45px;
+            font-size: 16px;
+            outline: none;
+        }
+        .search-input:hover, .search-input:focus {
+            box-shadow: 0 1px 6px rgba(32,33,36,.28);
+            border-color: rgba(223,225,229,0);
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            color: #9aa0a6;
+        }
+        .results {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin-bottom: 25px;
+        }
+        .result-title {
+            color: #1a0dab;
+            text-decoration: none;
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        .result-title:hover {
+            text-decoration: underline;
+        }
+        .result-url {
+            color: #006621;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .result-description {
+            color: #4d5156;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .page-number {
+            color: #4285F4;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        .page-number:hover {
+            text-decoration: underline;
+        }
+        .current-page {
+            color: #202124;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">MySearch</div>
+        <div class="search-container">
+            <div class="search-icon">🔍</div>
+            <input type="text" class="search-input" id="search-input" value="">
+        </div>
+    </div>
+
+    <div class="results" id="results-container">
+        <!-- Результаты будут добавлены с помощью JavaScript -->
+    </div>
+
+    <div class="pagination">
+        <a href="#" class="page-number">1</a>
+        <a href="#" class="page-number">2</a>
+        <a href="#" class="page-number current-page">3</a>
+        <a href="#" class="page-number">4</a>
+        <a href="#" class="page-number">5</a>
+    </div>
+
+    <script>
+        // Получаем поисковый запрос из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        
+        // Устанавливаем значение в поле поиска
+        document.getElementById('search-input').value = query || '';
+        
+        // Пример базы данных для поиска
+        const database = [
+            {
+                title: "Как создать поисковую систему",
+                url: "https://example.com/create-search-engine",
+                description: "Подробное руководство по созданию собственной поисковой системы с нуля. Основные принципы работы поисковых алгоритмов."
+            },
+            {
+                title: "HTML и CSS для начинающих",
+                url: "https://example.com/html-css-basics",
+                description: "Изучите основы HTML и CSS для создания веб-страниц. Примеры кода и практические задания."
+            },
+            {
+                title: "JavaScript: полное руководство",
+                url: "https://example.com/javascript-guide",
+                description: "Все, что вам нужно знать о JavaScript. От основ до продвинутых концепций."
+            },
+            {
+                title: "Веб-разработка в 2023 году",
+                url: "https://example.com/web-dev-2023",
+                description: "Актуальные тенденции и технологии в веб-разработке. Какие инструменты стоит изучить в первую очередь."
+            },
+            {
+                title: "Оптимизация производительности веб-сайтов",
+                url: "https://example.com/web-performance",
+                description: "Методы и инструменты для ускорения загрузки вашего сайта. Практические советы по оптимизации."
+            }
+        ];
+        
+        // Функция для отображения результатов
+        function displayResults() {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '';
+            
+            if (!query) {
+                resultsContainer.innerHTML = '<p>Пожалуйста, введите поисковый запрос.</p>';
+                return;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            const foundResults = database.filter(item => 
+                item.title.toLowerCase().includes(lowerQuery) || 
+                item.description.toLowerCase().includes(lowerQuery));
+            
+            if (foundResults.length === 0) {
+                resultsContainer.innerHTML = `<p>По запросу "${query}" ничего не найдено.</p>`;
+                return;
+            }
+            
+            foundResults.forEach(result => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result';
+                resultElement.innerHTML = `
+                    <a href="${result.url}" class="result-title">${highlightText(result.title, query)}</a>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${highlightText(result.description, query)}</div>
+                `;
+                resultsContainer.appendChild(resultElement);
+            });
+        }
+        
+        // Функция для подсветки найденного текста
+        function highlightText(text, query) {
+            if (!query) return text;
+            
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span style="background-color: #fff59d;">$1</span>');
+        }
+        
+        // Обработчик для поиска при нажатии Enter
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const newQuery = this.value.trim();
+                if (newQuery) {
+                    window.location.href = `results.html?q=${encodeURIComponent(newQuery)}`;
+                }
+            }
+        });
+        
+        // Отображаем результаты при загрузке страницы
+        displayResults();
+    </script>
+</body>
+</html>
